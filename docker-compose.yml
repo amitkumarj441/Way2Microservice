@@ -1,0 +1,46 @@
+version: '2'
+services:
+  api:
+    image: /micro-with-plugins:0.2
+    command: --registry nats --registry_address nats:4222 --transport nats --transport_address nats:4222 --broker nats --broker_address nats:4222 -- api
+    restart: always
+    ports:
+      - "8080:8080"
+    depends_on:
+      - nats
+  sidecar:
+    image: /micro-with-plugins:0.2
+    command: --registry nats --registry_address nats:4222 --transport nats --transport_address nats:4222 --broker nats --broker_address nats:4222 -- sidecar
+    restart: always
+    ports:
+      - "8081:8081"
+    depends_on:
+      - nats
+  web:
+    image: /micro-with-plugins:0.2
+    command: --registry nats --registry_address nats:4222 --transport nats --transport_address nats:4222 --broker nats --broker_address nats:4222 -- web
+    restart: always
+    ports:
+    - "8082:8082"
+    depends_on:
+    - nats
+  bot:
+    image: /niibot:0.3
+    command: --registry nats --registry_address nats:4222 --transport nats --transport_address nats:4222 --broker nats --broker_address nats:4222 -- bot --inputs slack --slack_token=SLACK_TOKEN
+    restart: always
+    depends_on:
+    - nats
+  nats:
+    image: nats-streaming:0.2.2
+    ports:
+    - "4222:4222"
+    - "8222:8222"
+  influx:
+    image: influxdb:1.0.2-alpine
+    ports:
+    - "8083:8083"
+    - "8086:8086"
+  redis:
+    image: redis:3.2.1-alpine
+    ports:
+- "6379:6379"
